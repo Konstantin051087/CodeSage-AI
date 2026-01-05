@@ -1,0 +1,30 @@
+name: Bug Report
+description: Сообщите об ошибке в работе инструмента
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за ваш вклад! Для ускорения решения укажите:
+  - type: input
+    id: environment
+    attributes:
+      label: Окружение
+      description: ОС, версия Python, версия CodeSage
+      placeholder: "Ubuntu 22.04, Python 3.10, CodeSage 0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги для воспроизведения
+      placeholder: |
+        1. Запустите `codesage analyze --path example.py`
+        2. Увидите ошибку в строке 15
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение
