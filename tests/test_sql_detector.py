@@ -1,6 +1,7 @@
 import libcst as cst
 import textwrap
 from core.detectors import SQLInjectionDetector
+from core.detectors import analyze_code
 from core.detectors import DangerousFunctionDetector
 
 def test_fstring_vulnerability():
