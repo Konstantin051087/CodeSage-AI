@@ -15,3 +15,14 @@ Open-source инструмент для анализа кода с ИИ, кот�
 ```bash
 pip install codesage
 codesage analyze --path ./your_project
+
+## 🛠️ Детекторы
+CodeSage находит:
+- SQL-инъекции через f-строки, конкатенацию и %-форматирование.
+- Использование `eval()`, `exec()`, `pickle.loads()`.
+
+## 🧪 Тестирование
+```bash
+pytest tests/ --cov=core
+
+https://asciinema.org/connect/0f577664-d064-45a8-a9a0-c97fae755fbb
