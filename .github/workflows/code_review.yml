@@ -23,7 +23,7 @@ jobs:
       
       - name: Run Analysis
         run: |
-          codesage analyze --path . --output report.md
+          codesage --path . --output report.md
         continue-on-error: true  # Не останавливать workflow при уязвимостях
       
       - name: Comment PR
