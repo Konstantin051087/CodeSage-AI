@@ -27,4 +27,6 @@ CodeSage находит:
 ```bash
 pytest tests/ --cov=core --cov-report=html
 
-[![asciicast](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz.svg)](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz)
+<a href="https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz" target="_blank">
+  <img src="https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz.svg" alt="asciicast" />
+</a>
