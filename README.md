@@ -28,7 +28,4 @@ CodeSage находит:
 pytest tests/ --cov=core --cov-report=html
 
 ## Пример работы
-```bash
-<a href="https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz" target="_blank">
-  <img src="https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz.svg" alt="asciicast" />
-</a>
+[![asciicast](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz.png)](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz)
