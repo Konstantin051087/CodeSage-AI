@@ -83,6 +83,6 @@ class DangerousFunctionDetector(CSTVisitor):
             pos = self.get_metadata(PositionProvider, node)
             self.vulnerabilities.append({
                 "type": "dangerous_function",
-                "name": full_name,
+                "function": full_name,
                 "line": pos.start.line
             })
