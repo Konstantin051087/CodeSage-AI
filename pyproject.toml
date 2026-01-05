@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools","wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codesage-ai"
+description = "AI-powered code analysis tool"
+version = "0.1.0"
+dependencies = [
+    "click",
+    "libcst",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]       # искать в корне
+include = ["core", "integrations", "tests"]  # только эти пакеты
