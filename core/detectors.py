@@ -44,3 +44,19 @@ class SQLInjectionDetector(cst.CSTVisitor):
             "# Используйте:\n"
             "cursor.execute(\"SELECT * FROM users WHERE name = %s\", (name,))"
         )
+
+class DangerousFunctionDetector(cst.CSTVisitor):
+    DANGEROUS_FUNCTIONS = {"eval", "pickle.loads", "exec"}
+    
+    def __init__(self):
+        self.vulnerabilities = []
+    
+    def visit_Call(self, node: cst.Call):
+        if isinstance(node.func, cst.Name) and node.func.value in self.DANGEROUS_FUNCTIONS:
+            pos = self.get_metadata(PositionProvider, node).start
+            self.vulnerabilities.append({
+                "type": "dangerous_function",
+                "function": node.func.value,
+                "line": pos.line,
+                "fix": f"Замените {node.func.value} на безопасную альтернативу (например, json.loads вместо pickle.loads)"
+            })
