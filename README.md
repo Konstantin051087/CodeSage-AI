@@ -22,7 +22,9 @@ CodeSage находит:
 - Использование `eval()`, `exec()`, `pickle.loads()`.
 
 ## 🧪 Тестирование
-```bash
-pytest tests/ --cov=core
 
-https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz
+Запуск тестов с отчётом о покрытии:
+```bash
+pytest tests/ --cov=core --cov-report=html
+
+[![asciicast](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz.svg)](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz)
