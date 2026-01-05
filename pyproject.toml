@@ -13,9 +13,9 @@ dependencies = [
     "pytest-cov",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]       # искать в корне
-include = ["core", "integrations", "tests"]  # только эти пакеты
-
-[tool.setuptools.entry-points.console_scripts]
+[project.scripts]
 codesage = "core.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core", "integrations", "tests"]
