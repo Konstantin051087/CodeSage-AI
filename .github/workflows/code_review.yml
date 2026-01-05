@@ -1,0 +1,39 @@
+name: CodeSage Review
+
+on:
+  pull_request:
+    paths:
+      - '**.py'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      
+      - name: Install CodeSage
+        run: |
+          pip install -r requirements.txt
+          pip install .  # Установка из локального репозитория
+      
+      - name: Run Analysis
+        run: |
+          codesage analyze --path . --output report.md
+        continue-on-error: true  # Не останавливать workflow при уязвимостях
+      
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const report = require('fs').readFileSync('report.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report.substring(0, 65535)  // Ограничение GitHub API
+            });
