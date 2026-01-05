@@ -12,7 +12,7 @@ This project is licensed under the [MIT License](LICENSE).
 Open-source инструмент для анализа кода с ИИ, который объясняет ошибки **на языке бизнеса** (экономия денег/времени).
 
 ## ⚡️ Быстрый старт
-```bash
+
 pip install codesage
 codesage analyze --path ./your_project
 
@@ -22,10 +22,15 @@ CodeSage находит:
 - Использование `eval()`, `exec()`, `pickle.loads()`.
 
 ## 🧪 Тестирование
-
 Запуск тестов с отчётом о покрытии:
-```bash
+
 pytest tests/ --cov=core --cov-report=html
+
+## 🔧 Покрытие 
+core/detectors.py: 100% (проверяется в CI).
+
+## 🤖 GitHub Actions
+Каждый PR автоматически проверяется на уязвимости.
 
 ## Пример работы
 [![asciicast](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz.png)](https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz)
