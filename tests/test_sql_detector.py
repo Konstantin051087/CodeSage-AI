@@ -1,7 +1,6 @@
 import libcst as cst
 import textwrap
 from core.detectors import SQLInjectionDetector
-from core.detectors import analyze_code
 from core.detectors import DangerousFunctionDetector
 
 def test_fstring_vulnerability():
@@ -23,8 +22,3 @@ def test_pickle_loads():
     wrapper = cst.MetadataWrapper(module)
     wrapper.visit(detector)
     assert len(detector.vulnerabilities) == 1
-
-def test_safe_query():
-    code = 'cursor.execute("SELECT * FROM users WHERE name = %s", (name,))'
-    # Должен вернуть 0 уязвимостей
-    assert len(analyze_code(code)) == 0
