@@ -26,6 +26,3 @@ jobs:
       - name: Run tests
         run: |
           pytest tests/ --cov=core
-strategy:
-  matrix:
-    os: [ubuntu-latest, windows-latest]
