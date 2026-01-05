@@ -1,11 +1,13 @@
 import libcst as cst
+import textwrap
 from core.detectors import SQLInjectionDetector
+from core.detectors import DangerousFunctionDetector
 
 def test_fstring_vulnerability():
-    code = """
+    code = textwrap.dedent("""
     def get_user(name):
         cursor.execute(f"SELECT * FROM users WHERE name = {name}")
-    """
+    """)
     module = cst.parse_module(code)
     detector = SQLInjectionDetector()
     wrapper = cst.MetadataWrapper(module)
