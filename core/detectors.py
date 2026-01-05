@@ -1,4 +1,5 @@
 import libcst as cst
+from libcst import CSTVisitor, Name, Attribute, Call
 from libcst.metadata import PositionProvider
 
 class SQLInjectionDetector(cst.CSTVisitor):
@@ -45,18 +46,43 @@ class SQLInjectionDetector(cst.CSTVisitor):
             "cursor.execute(\"SELECT * FROM users WHERE name = %s\", (name,))"
         )
 
-class DangerousFunctionDetector(cst.CSTVisitor):
-    DANGEROUS_FUNCTIONS = {"eval", "pickle.loads", "exec"}
-    
+class DangerousFunctionDetector(CSTVisitor):
+    # ensure MetadataWrapper computes PositionProvider for us
+    METADATA_DEPENDENCIES = (PositionProvider,)
+
     def __init__(self):
         self.vulnerabilities = []
-    
-    def visit_Call(self, node: cst.Call):
-        if isinstance(node.func, cst.Name) and node.func.value in self.DANGEROUS_FUNCTIONS:
-            pos = self.get_metadata(PositionProvider, node).start
+
+    def visit_Call(self, node: Call) -> None:
+        func = node.func
+        full_name = None
+
+        # plain function name: loads(...) or eval(...)
+        if isinstance(func, Name):
+            full_name = func.value
+
+        # attribute call: pickle.loads(...) or module.func(...)
+        elif isinstance(func, Attribute):
+            # only handle simple module.function forms (e.g. pickle.loads)
+            value = func.value
+            attr = func.attr
+            if isinstance(value, Name) and isinstance(attr, Name):
+                full_name = f"{value.value}.{attr.value}"
+
+        # set of dangerous names we want to catch
+        dangerous = {
+            "eval",
+            "exec",
+            "pickle.loads",
+            "pickle.load",
+            # add others as needed:
+            # "yaml.load", "subprocess.Popen", ...
+        }
+
+        if full_name and full_name in dangerous:
+            pos = self.get_metadata(PositionProvider, node)
             self.vulnerabilities.append({
                 "type": "dangerous_function",
-                "function": node.func.value,
-                "line": pos.line,
-                "fix": f"Замените {node.func.value} на безопасную альтернативу (например, json.loads вместо pickle.loads)"
+                "name": full_name,
+                "line": pos.start.line
             })
