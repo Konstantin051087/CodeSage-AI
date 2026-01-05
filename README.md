@@ -25,4 +25,4 @@ CodeSage находит:
 ```bash
 pytest tests/ --cov=core
 
-https://asciinema.org/connect/0f577664-d064-45a8-a9a0-c97fae755fbb
+https://asciinema.org/a/LgOfUcPNC0ROyrogX4iDCdZGz

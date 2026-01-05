@@ -9,8 +9,10 @@ cursor.execute(f"SELECT * FROM data WHERE id = {user_input}")
 **Fix**:
 ```python
 # Вместо:
-cursor.execute(f"SELECT * FROM users WHERE name = {name}")
-# Используйте:
+# cursor.execute(f"SELECT * FROM users WHERE name = {name}")
+# или
+# cursor.execute("SELECT * FROM users WHERE id = " + user_id)
+# Используйте параметризованный запрос:
 cursor.execute("SELECT * FROM users WHERE name = %s", (name,))
 ```
 **Business Impact**: Risk of full database leak → GDPR fines up to €20M.
