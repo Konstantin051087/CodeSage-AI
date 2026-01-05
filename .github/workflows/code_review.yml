@@ -5,6 +5,11 @@ on:
     paths:
       - '**.py'
 
+# 🔑 Обязательные права для комментирования в PR
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -19,21 +24,35 @@ jobs:
       - name: Install CodeSage
         run: |
           pip install -r requirements.txt
-          pip install .  # Установка из локального репозитория
+          pip install .
       
       - name: Run Analysis
         run: |
           codesage --path . --output report.md
-        continue-on-error: true  # Не останавливать workflow при уязвимостях
+        continue-on-error: true  # Продолжать даже если анализ нашёл уязвимости или упал
       
       - name: Comment PR
+        if: always()  # ← ВАЖНО: комментировать ВСЕГДА, даже если шаги выше упали
         uses: actions/github-script@v7
         with:
           script: |
-            const report = require('fs').readFileSync('report.md', 'utf8');
-            github.rest.issues.createComment({
+            const fs = require('fs');
+            const path = 'report.md';
+            let body;
+            if (fs.existsSync(path)) {
+              body = fs.readFileSync(path, 'utf8');
+            } else {
+              body = "**⚠️ CodeSage failed to generate a report.**\n\n" +
+                     "Possible reasons:\n" +
+                     "- CLI crashed (check 'Run Analysis' logs),\n" +
+                     "- No Python files found,\n" +
+                     "- Unhandled exception in detector or reporter.\n\n" +
+                     "🔍 Please review the workflow logs for details.";
+            }
+            // GitHub API ограничивает длину комментария
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: report.substring(0, 65535)  // Ограничение GitHub API
+              body: body.substring(0, 65535)
             });
