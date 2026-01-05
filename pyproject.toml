@@ -16,3 +16,6 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]       # искать в корне
 include = ["core", "integrations", "tests"]  # только эти пакеты
+
+[tool.setuptools.entry-points.console_scripts]
+codesage = "core.cli:main"
