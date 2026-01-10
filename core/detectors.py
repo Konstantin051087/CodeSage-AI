@@ -2,7 +2,6 @@ import libcst as cst
 from libcst import CSTVisitor, Name, Attribute, Call
 from libcst.metadata import PositionProvider
 
-
 class SQLInjectionDetector(CSTVisitor):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
@@ -10,16 +9,13 @@ class SQLInjectionDetector(CSTVisitor):
         self.vulnerabilities = []
 
     def visit_Call(self, node: cst.Call):
-        # Проверяем вызовы вида cursor.execute(...)
         if (
             isinstance(node.func, cst.Attribute) and
             node.func.attr.value == "execute"
         ):
-            # 🔒 Безопасный запрос: если передано 2+ аргумента → параметризованный вызов
             if len(node.args) >= 2:
-                return  # НЕ уязвимость
+                return
 
-            # Опасен только вызов с одним аргументом (строкой)
             if len(node.args) == 0:
                 return
 
@@ -28,31 +24,22 @@ class SQLInjectionDetector(CSTVisitor):
                 pos = self.get_metadata(PositionProvider, node).start
                 self.vulnerabilities.append({
                     "type": "sql_injection",
-                    "file": "current_file",  # будет заменено в cli.py
+                    "file": "current_file",
                     "line": pos.line,
                     "code": self._get_code_snippet(node),
                     "fix": self._generate_fix(node)
                 })
 
     def _is_dangerous_sql_expression(self, node: cst.BaseExpression) -> bool:
-        """Определяет, является ли выражение потенциально опасным для SQL-инъекции."""
-        # f-строки — всегда опасны
         if isinstance(node, cst.FormattedString):
             return True
-
-        # Бинарные операции: конкатенация (+) или форматирование (%)
         if isinstance(node, cst.BinaryOperation):
             return isinstance(node.operator, (cst.Add, cst.Modulo))
-
-        # Простая строка сама по себе НЕ опасна (даже если содержит %s)
-        # Пример: "SELECT * FROM t WHERE id = %s" — безопасна
         if isinstance(node, cst.SimpleString):
             return False
-
         return False
 
     def _get_code_snippet(self, node: cst.Call) -> str:
-        # Используем пустой модуль для генерации сниппета
         return cst.Module([]).code_for_node(node)
 
     def _generate_fix(self, node: cst.Call) -> str:
@@ -69,6 +56,14 @@ class SQLInjectionDetector(CSTVisitor):
 class DangerousFunctionDetector(CSTVisitor):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
+    DANGEROUS_FUNCTIONS = {
+        "eval": "Avoid eval() — use ast.literal_eval for safe evaluation.",
+        "exec": "Avoid exec() — refactor to avoid dynamic code execution.",
+        "pickle.loads": "Avoid pickle.loads() — use json.loads for safe deserialization.",
+        "pickle.load": "Avoid pickle.load() — use json.load for safe deserialization.",
+        "jsonpickle.decode": "Avoid jsonpickle.decode() — use standard json module.",
+    }
+
     def __init__(self):
         self.vulnerabilities = []
 
@@ -76,31 +71,21 @@ class DangerousFunctionDetector(CSTVisitor):
         func = node.func
         full_name = None
 
-        # Прямой вызов: eval(), exec()
         if isinstance(func, Name):
             full_name = func.value
-
-        # Атрибутный вызов: pickle.loads(), yaml.load()
         elif isinstance(func, Attribute):
             value = func.value
             attr = func.attr
-            # Обрабатываем только простые случаи: модуль.функция
             if isinstance(value, Name) and isinstance(attr, Name):
                 full_name = f"{value.value}.{attr.value}"
 
-        dangerous = {
-            "eval",
-            "exec",
-            "pickle.loads",
-            "pickle.load",
-            # Можно расширить: "yaml.load", "subprocess.Popen" и т.д.
-        }
-
-        if full_name and full_name in dangerous:
+        if full_name and full_name in self.DANGEROUS_FUNCTIONS:
             pos = self.get_metadata(PositionProvider, node).start
             self.vulnerabilities.append({
                 "type": "dangerous_function",
                 "function": full_name,
                 "file": "current_file",
-                "line": pos.line
+                "line": pos.line,
+                # 🔴 Критическое исправление: добавлено поле fix
+                "fix": self.DANGEROUS_FUNCTIONS[full_name]
             })
