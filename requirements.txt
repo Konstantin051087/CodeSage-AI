@@ -1,2 +1,4 @@
-pytest
-pytest-cov
+click==8.1.7
+pytest==7.4.3
+pytest-cov==4.1.0
+libcst==1.1.0
