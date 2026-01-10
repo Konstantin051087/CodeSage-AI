@@ -1,0 +1,65 @@
+name: CodeSage Review
+on:
+  pull_request:
+    paths:
+      - '**.py'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      
+      - name: Install CodeSage
+        run: |
+          pip install -r requirements.txt
+          pip install .
+      
+      - name: Run Analysis
+        run: |
+          # Добавлен параметр --root для корректных относительных путей
+          codesage --path . --root . --output report.md
+        continue-on-error: true
+        
+      - name: Truncate Report if Needed
+        run: |
+          if [ $(wc -c < report.md) -gt 65500 ]; then
+            head -c 65500 report.md > report_truncated.md
+            echo "..." >> report_truncated.md
+            mv report_truncated.md report.md
+          fi
+        shell: bash
+        
+      - name: Comment PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'report.md';
+            let body = "**⚠️ CodeSage analysis failed. Check workflow logs.**";
+            if (fs.existsSync(path)) {
+              body = fs.readFileSync(path, 'utf8');
+            }
+            // GitHub API ограничивает длину комментария
+            if (body.length > 65535) {
+              body = body.substring(0, 65532) + "...";
+            }
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
