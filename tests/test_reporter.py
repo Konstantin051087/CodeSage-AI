@@ -4,7 +4,7 @@ def test_skipped_files_report():
     report = generate_markdown_report([], skipped_files=["broken.py"])
     assert "⚠️ **Skipped files due to syntax errors**:" in report
     assert "- `broken.py`" in report
-    assert "No vulnerabilities found" not in report  # Даже при отсутствии уязвимостей
+    assert "No vulnerabilities found in parsable files" in report
 
 def test_sql_report():
     vuln = {
@@ -34,8 +34,6 @@ def test_empty_report():
     report = generate_markdown_report([])
     assert "✅ **CodeSage Report**: No vulnerabilities found." in report
 
-def test_skipped_files_report():
+def test_skipped_files_without_vulnerabilities_message():
     report = generate_markdown_report([], skipped_files=["broken.py"])
-    assert "⚠️ **Skipped files due to syntax errors**:" in report
-    assert "- `broken.py`" in report
-    assert "No vulnerabilities found" not in report
+    assert "No vulnerabilities found in parsable files" in report

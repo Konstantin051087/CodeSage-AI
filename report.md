@@ -1,4 +1,6 @@
 ⚠️ **Skipped files due to syntax errors**:
 
-- `../../../../tmp/pytest-of-konstanin/pytest-16/test_syntax_error0/broken.py`
+- `noaccess.py`
 
+
+✅ **CodeSage Report**: No vulnerabilities found in parsable files.

@@ -3,18 +3,16 @@ import libcst as cst
 from .detectors import SQLInjectionDetector, DangerousFunctionDetector
 from .reporter import generate_markdown_report
 import os
-from pathlib import Path  # Добавлен импорт Path
+from pathlib import Path
+
 
 @click.command()
 @click.option("--path", required=True, type=click.Path(exists=True, path_type=Path), help="Path to Python file or directory")
 @click.option("--output", default="report.md", help="Output report file")
-@click.option("--root", default=".", help="Root directory for relative paths (default: current directory)")  # 🔴 Новый параметр
-def analyze(path, output, root):
-    #if not os.path.exists(path):
-    #    click.echo(f"Error: Path '{path}' does not exist.", err=True)
-    #    return 1
-    
-    # 🔴 Определяем корневую директорию для относительных путей
+@click.option("--root", default=".", help="Root directory for relative paths (default: current directory)")
+@click.pass_context
+def analyze(ctx, path, output, root):
+    """Analyze Python files for security vulnerabilities."""
     root_path = Path(root).resolve()
     vulnerabilities = []
     skipped_files = []
@@ -23,9 +21,9 @@ def analyze(path, output, root):
         files = [path]
     else:
         files = [
-            os.path.join(root, f) 
-            for root, _, files in os.walk(path) 
-            for f in files 
+            os.path.join(root, f)
+            for root, _, files in os.walk(path)
+            for f in files
             if f.endswith(".py")
         ]
     
@@ -33,8 +31,13 @@ def analyze(path, output, root):
         try:
             with open(file_path, "r") as f:
                 code = f.read()
-            
-            # 🔴 Получаем относительный путь от корневой директории
+        except PermissionError:
+            rel_file = os.path.relpath(Path(file_path).resolve(), root_path)
+            click.echo(f"Permission denied: {rel_file}", err=True)
+            skipped_files.append(rel_file)
+            continue
+        
+        try:
             rel_path = os.path.relpath(Path(file_path).resolve(), root_path)
             
             module = cst.parse_module(code)
@@ -53,7 +56,6 @@ def analyze(path, output, root):
             vulnerabilities.extend(dangerous_detector.vulnerabilities)
         
         except cst.ParserSyntaxError as e:
-            # 🔴 Используем rel_path вместо file_path
             rel_file = os.path.relpath(Path(file_path).resolve(), root_path)
             click.echo(f"Syntax error in {rel_file}: {str(e)}", err=True)
             skipped_files.append(rel_file)
@@ -63,7 +65,8 @@ def analyze(path, output, root):
         f.write(report)
     
     click.echo(f"✅ Report saved to {output}")
-    return 0
+    ctx.exit(0)
+
 
 if __name__ == "__main__":
-    exit_code = analyze()
+    analyze()

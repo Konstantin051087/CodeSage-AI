@@ -4,16 +4,16 @@ def generate_markdown_report(vulnerabilities: list, skipped_files: list = None) 
     
     report_lines = []
     
-    # 🔴 Добавлен блок для пропущенных файлов
     if skipped_files:
         report_lines.append("⚠️ **Skipped files due to syntax errors**:\n")
         for file in skipped_files:
             report_lines.append(f"- `{file}`")
         report_lines.append("\n")
     
-    # Основной отчет по уязвимостям
     if not vulnerabilities:
-        if not skipped_files:  # Только если нет пропущенных файлов
+        if skipped_files:
+            report_lines.append("✅ **CodeSage Report**: No vulnerabilities found in parsable files.")
+        else:
             report_lines.append("✅ **CodeSage Report**: No vulnerabilities found.")
     else:
         report_lines.append("⚠️ **CodeSage Security Report**\n")

@@ -13,9 +13,11 @@ class SQLInjectionDetector(CSTVisitor):
             isinstance(node.func, cst.Attribute) and
             node.func.attr.value == "execute"
         ):
+            # 2+ аргументов — скорее всего параметризованный запрос (безопасно)
             if len(node.args) >= 2:
                 return
 
+            # 0 аргументов — нечего анализировать
             if len(node.args) == 0:
                 return
 
