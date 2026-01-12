@@ -205,3 +205,21 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# AI training artifacts
+ai_training/models/
+ai_training/datasets/*.json
+!ai_training/datasets/example.json
+ai_training/notebooks/*.ipynb_checkpoints
+ai_cache.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+env/
