@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codesage-ai"
+description = "AI-powered code analysis tool"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "click==8.1.7",
+    "libcst==1.1.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==7.4.3",
+    "pytest-cov==4.1.0",
+]
+
+ai = [
+    # Keep in sync with ai_training/requirements.txt
+    "torch==2.1.0",
+    "transformers==4.35.0",
+]
+
+[project.scripts]
+codesage = "core.cli:analyze"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core", "tests", "fixtures"]
+exclude = ["htmlcov"]
