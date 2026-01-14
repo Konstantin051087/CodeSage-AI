@@ -1,8 +1,5 @@
 # Файл: core/reporter.py (обновленная версия)
-import os
-from .ai.ai_explainer import AIExplainer
-
-def generate_markdown_report(vulnerabilities: list, skipped_files: list = None, use_ai=True) -> str:
+def generate_markdown_report(vulnerabilities: list, skipped_files: list = None, use_ai: bool = False, ai_model: str | None = None,) -> str:
     """
     Генерирует Markdown-отчет с результатами анализа
     
@@ -32,9 +29,24 @@ def generate_markdown_report(vulnerabilities: list, skipped_files: list = None, 
             report_lines.append("✅ **CodeSage Report**: No vulnerabilities found.")
         return "\n".join(report_lines)
     
-    # Инициализация AIExplainer
-    ai_explainer = AIExplainer(use_ai=use_ai)
+    ai_explainer = None
+    ai_failed_reason = None
+    if use_ai:
+       # Ленивая загрузка AI-части, чтобы без флага --ai и в тестах
+       # не тянуть тяжелые зависимости (torch, transformers)
+       try:
+           from .ai.ai_explainer import AIExplainer
+           ai_explainer = AIExplainer(model_path=ai_model, use_ai=True)
+       except Exception as exc:
+           # Не даем отчёту упасть, просто переходим в шаблонный режим
+           ai_failed_reason = str(exc)
+           use_ai = False
     
+    if ai_failed_reason:
+        report_lines.append(
+           f"⚠️ **AI explanations are unavailable**: falling back to templates. Reason: {ai_failed_reason}\n"
+       )
+
     report_lines.append("⚠️ **CodeSage Security Report**\n")
     
     for idx, vuln in enumerate(vulnerabilities, 1):

@@ -10,9 +10,15 @@ from pathlib import Path
 @click.option("--path", required=True, help="Path to Python file or directory")
 @click.option("--output", default="report.md", help="Output report file")
 @click.option("--root", default=".", help="Root directory for relative paths (default: current directory)")
-@click.option("--no-ai", is_flag=True, help="Disable AI explanations (faster, less context)")
+@click.option(
+    "--ai/--no-ai",
+    "ai_enabled",
+    default=False,
+    show_default=True,
+    help="Enable or disable AI explanations (default: no-ai)",
+)
 @click.option("--ai-model", default=None, help="Path to custom AI model (optional)")
-def analyze(path, output, root, no_ai, ai_model):
+def analyze(path, output, root, ai_enabled, ai_model):
     """
     Анализирует Python-код на уязвимости и генерирует отчет
     
@@ -32,7 +38,8 @@ def analyze(path, output, root, no_ai, ai_model):
     vulnerabilities = []
     skipped_files = []
     
-    use_ai = not no_ai
+    # AI explanations are opt-in and require extra dependencies/model
+    use_ai = bool(ai_enabled)
     
     if os.path.isfile(path):
         files = [path]
@@ -74,7 +81,12 @@ def analyze(path, output, root, no_ai, ai_model):
             skipped_files.append(rel_file)
     
     # Генерация отчета с настройками ИИ
-    report = generate_markdown_report(vulnerabilities, skipped_files, use_ai=use_ai)
+    report = generate_markdown_report(
+        vulnerabilities,
+        skipped_files,
+        use_ai=use_ai,
+        ai_model=ai_model,
+    )
     with open(output, "w") as f:
         f.write(report)
     
@@ -82,7 +94,7 @@ def analyze(path, output, root, no_ai, ai_model):
     
     # Выводим информацию об использовании ИИ
     if use_ai:
-        click.echo("🤖 AI explanations generated for business impact analysis")
+        click.echo("🤖 AI explanations requested (model may fall back to templates if unavailable)")
     
     return 0
 

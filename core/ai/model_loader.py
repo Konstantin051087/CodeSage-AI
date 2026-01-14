@@ -1,11 +1,19 @@
 # Файл: core/ai/model_loader.py
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
 import os
 import logging
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+_IMPORT_ERROR = None
+try:
+    import torch  # type: ignore
+    from transformers import AutoTokenizer, AutoModelForCausalLM  # type: ignore
+except Exception as e:  # ImportError + optional CUDA/other edge cases
+    torch = None  # type: ignore
+    AutoTokenizer = None  # type: ignore
+    AutoModelForCausalLM = None  # type: ignore
+    _IMPORT_ERROR = e
 
 class AIModelLoader:
     """Загружает и управляет AI-моделью для генерации бизнес-объяснений"""
@@ -21,6 +29,12 @@ class AIModelLoader:
             device (str): Устройство для инференса ('cpu', 'cuda', 'mps')
         """
         self.model_path = model_path or self.DEFAULT_MODEL_PATH
+        if torch is None or AutoTokenizer is None or AutoModelForCausalLM is None:
+            raise RuntimeError(
+                "AI dependencies are not installed. Install with: pip install 'codesage-ai[ai]'. "
+                f"Original import error: {_IMPORT_ERROR!r}"
+            )
+
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         
         # Проверяем, является ли путь локальным файлом

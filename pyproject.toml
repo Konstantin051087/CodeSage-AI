@@ -18,6 +18,12 @@ test = [
     "pytest-cov==4.1.0",
 ]
 
+ai = [
+    # Keep in sync with ai_training/requirements.txt
+    "torch==2.1.0",
+    "transformers==4.35.0",
+]
+
 [project.scripts]
 codesage = "core.cli:analyze"
 
